@@ -14,11 +14,11 @@ from preprocessing import preprocess_data
 if "GITHUB_ACTIONS" in os.environ:
     mlflow.set_tracking_uri("sqlite:///mlflow.db")
 
-
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     np.random.seed(42)
 
+    # Argumen CLI
     n_estimators = int(sys.argv[1]) if len(sys.argv) > 1 else 100
     max_depth = int(sys.argv[2]) if len(sys.argv) > 2 else 10
     file_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(__file__), "data_train.xlsx")
@@ -50,6 +50,7 @@ if __name__ == "__main__":
 
     y_pred = best_model.predict(X_test)
 
+    # 🟢 Pindahkan ke dalam sini
     with mlflow.start_run():
         mlflow.log_params({"n_estimators": n_estimators, "max_depth": max_depth})
         mlflow.log_metrics({
@@ -59,10 +60,9 @@ if __name__ == "__main__":
             "test_r2": r2_score(y_test, y_pred),
             "accuracy": best_model.score(X_test, y_test)
         })
-    
+
         mlflow.sklearn.log_model(
             sk_model=best_model,
             input_example=X_train[:1],
             name="model"
         )
-
