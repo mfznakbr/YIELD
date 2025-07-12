@@ -10,27 +10,17 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from preprocessing import preprocess_data
 
-# Setup MLflow untuk GitHub Actions
-mlruns_path = Path(__file__).parent / "mlruns"
-mlruns_path.mkdir(exist_ok=True, parents=True)
-mlflow.set_tracking_uri(f"file://{mlruns_path.absolute()}")
-
-# Buat default experiment jika belum ada
-if not mlflow.get_experiment_by_name("Default"):
-    mlflow.create_experiment("Default", str(mlruns_path))
-mlflow.set_experiment("Default")
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     np.random.seed(42)
 
     # Ambil argumen CLI
-    n_estimators = int(sys.argv[1]) if len(sys.argv) > 1 else 100
-    max_depth = int(sys.argv[2]) if len(sys.argv) > 2 else 10
-    data_path = sys.argv[3] if len(sys.argv) > 3 else "data_train.xlsx"
-
+    # Read the wine-quality csv file (make sure you're running this from the root of MLflow!)
+    file_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(os.path.abspath(__file__)), "data_train.xlxs")
+    data = pd.read_excel(file_path)
     # Load data
-    train_df = pd.read_excel(data_path)
+    train_df = pd.read_excel(data)
     test_df = pd.read_excel("testing.xlsx")
     target = "Ton"
 
@@ -83,6 +73,7 @@ if __name__ == "__main__":
             artifact_path="model",
             input_example=X_train[:1]
         )
+        accuracy = best_model.score(X_test, y_test)
+        mlflow.log_metric("accuracy", accuracy)
 
-        print(f"✅ Best Params: {grid_search.best_params_}")
-        print(f"📈 Test R2 Score: {r2_score(y_test, y_pred):.3f}")
+
