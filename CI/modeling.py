@@ -1,7 +1,10 @@
+import os
+os.environ["MLFLOW_TRACKING_URI"] = "file://" + os.path.abspath("mlruns")
+os.environ["MLFLOW_ARTIFACTS_URI"] = "file://" + os.path.abspath("mlruns")
+
 import mlflow
 import pandas as pd
 import numpy as np
-import os
 import warnings
 import sys
 from sklearn.ensemble import RandomForestRegressor
@@ -18,7 +21,7 @@ if __name__ == "__main__":
     max_depth = int(sys.argv[2]) if len(sys.argv) > 2 else 10
     data_path = sys.argv[3] if len(sys.argv) > 3 else "data_train.xlsx"
 
-    # === Baca data ===
+    # === Load data ===
     train_df = pd.read_excel(data_path)
     test_df = pd.read_excel("testing.xlsx")
     target = "Ton"
@@ -32,15 +35,9 @@ if __name__ == "__main__":
         file_path=file_path
     )
 
-    # === Setup MLflow ===
-    # Jangan set URI agar default ke ./mlruns (portable untuk GitHub Actions)
-    #mlflow.set_experiment("Prediksi Panen Tebu (GridSearch RF)")
-
-    with mlflow.start_run(nested=True):
-        # Auto-log semua artifact dan metric
-        mlflow.autolog()
-
-        # === Setup hyperparameter grid ===
+    # === Mulai MLflow run ===
+    with mlflow.start_run():
+        # Setup grid
         param_grid = {
             "n_estimators": [n_estimators],
             "max_depth": [max_depth],
@@ -59,29 +56,31 @@ if __name__ == "__main__":
             verbose=2
         )
 
-        # === Training ===
+        # Training
         grid_search.fit(X_train, y_train)
         best_model = grid_search.best_estimator_
 
-        # === Evaluasi ===
+        # Evaluasi
         y_pred = best_model.predict(X_test)
         mse = mean_squared_error(y_test, y_pred)
         rmse = np.sqrt(mse)
         mae = mean_absolute_error(y_test, y_pred)
         r2 = r2_score(y_test, y_pred)
 
-        # === Logging manual ===
+        # Logging manual
+        mlflow.log_param("n_estimators", n_estimators)
+        mlflow.log_param("max_depth", max_depth)
         mlflow.log_metric("test_mse", mse)
         mlflow.log_metric("test_rmse", rmse)
         mlflow.log_metric("test_mae", mae)
         mlflow.log_metric("test_r2", r2)
 
-        # === Simpan model final ===
-        input_example = X_train[0].reshape(1, -1)
+        # Simpan model
+        input_example = X_train[:1]
         mlflow.sklearn.log_model(
             sk_model=best_model,
-            artifact_path="random_forest_final_model",
-            input_example=input_example,
+            artifact_path="model",
+            input_example=input_example
         )
 
         print("✅ Best Params:", grid_search.best_params_)
