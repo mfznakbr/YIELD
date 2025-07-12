@@ -1,5 +1,7 @@
 name: predict_yield
 
+conda_env: conda.yaml  # <-- pastikan file ini ada juga
+
 entry_points:
   main:
     parameters:
