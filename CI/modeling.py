@@ -23,7 +23,8 @@ if __name__ == "__main__":
 
     # Load data
     train_df = pd.read_excel(file_path)
-    test_df = pd.read_excel("CI/testing.xlsx")  # Pastikan file ini juga tersedia saat CI/CD
+    test_df = pd.read_excel(os.path.join(os.path.dirname(__file__), "testing.xlsx"))
+  # Pastikan file ini juga tersedia saat CI/CD
 
     target = "Ton"
 
