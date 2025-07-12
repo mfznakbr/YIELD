@@ -35,33 +35,33 @@ if __name__ == "__main__":
         file_path=os.path.join(os.path.dirname(__file__), "columns.csv")
     )
 
-    with mlflow.start_run():
-        param_grid = {
-            "n_estimators": [n_estimators],
-            "max_depth": [max_depth],
-            "min_samples_split": [2, 5, 10],
-            "min_samples_leaf": [1, 2, 4],
-            "max_features": ["sqrt", 0.7],
-        }
+    # -- BLOK INI SUDAH DIPERBAIKI INDENTASINYA --
+    param_grid = {
+        "n_estimators": [n_estimators],
+        "max_depth": [max_depth],
+        "min_samples_split": [2, 5, 10],
+        "min_samples_leaf": [1, 2, 4],
+        "max_features": ["sqrt", 0.7],
+    }
 
-        model = RandomForestRegressor(random_state=42)
-        grid_search = GridSearchCV(model, param_grid, scoring="neg_mean_squared_error", cv=5, n_jobs=-1, verbose=2)
-        grid_search.fit(X_train, y_train)
-        best_model = grid_search.best_estimator_
+    model = RandomForestRegressor(random_state=42)
+    grid_search = GridSearchCV(model, param_grid, scoring="neg_mean_squared_error", cv=5, n_jobs=-1, verbose=2)
+    grid_search.fit(X_train, y_train)
+    best_model = grid_search.best_estimator_
 
-        y_pred = best_model.predict(X_test)
+    y_pred = best_model.predict(X_test)
 
-        mlflow.log_params({"n_estimators": n_estimators, "max_depth": max_depth})
-        mlflow.log_metrics({
-            "test_mse": mean_squared_error(y_test, y_pred),
-            "test_rmse": np.sqrt(mean_squared_error(y_test, y_pred)),
-            "test_mae": mean_absolute_error(y_test, y_pred),
-            "test_r2": r2_score(y_test, y_pred),
-            "accuracy": best_model.score(X_test, y_test)
-        })
+    mlflow.log_params({"n_estimators": n_estimators, "max_depth": max_depth})
+    mlflow.log_metrics({
+        "test_mse": mean_squared_error(y_test, y_pred),
+        "test_rmse": np.sqrt(mean_squared_error(y_test, y_pred)),
+        "test_mae": mean_absolute_error(y_test, y_pred),
+        "test_r2": r2_score(y_test, y_pred),
+        "accuracy": best_model.score(X_test, y_test)
+    })
 
-        mlflow.sklearn.log_model(
-            sk_model=best_model,
-            input_example=X_train[:1],
-            name="model"
-        )
+    mlflow.sklearn.log_model(
+        sk_model=best_model,
+        input_example=X_train[:1],
+        name="model"
+    )
