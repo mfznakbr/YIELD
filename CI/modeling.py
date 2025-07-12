@@ -31,8 +31,8 @@ if __name__ == "__main__":
     # Preprocessing
     X_train, X_test, y_train, y_test = preprocess_data(
         train_df, test_df, target_column=target,
-        save_path="CI/preprocessing.joblib",
-        file_path="CI/columns.csv"
+        save_path = os.path.join(os.path.dirname(__file__), "preprocessing.joblib"),
+        file_path = os.path.join(os.path.dirname(__file__), "columns.csv")
     )
 
     with mlflow.start_run():
