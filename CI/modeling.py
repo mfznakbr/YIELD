@@ -35,7 +35,7 @@ if __name__ == "__main__":
         file_path=os.path.join(os.path.dirname(__file__), "columns.csv")
     )
 
-    with mlflow.start_run(nested=True):
+    with mlflow.start_run():
         param_grid = {
             "n_estimators": [n_estimators],
             "max_depth": [max_depth],
