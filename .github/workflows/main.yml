@@ -2,66 +2,71 @@ name: CI/CD MLflow Tebu
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
+
+env:
+  CSV_URL: "CI/data_train.xlxs"
+  TARGET_VAR: "Ton"
+
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE
       - uses: actions/checkout@v3
 
-      - name: Set up Python
+      # Setup Python 3.12.7
+      - name: Set up Python 3.12.7
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
-
-      - name: Set MLflow Local Tracking URI
+          python-version: "3.12.7"
+      
+      # Check Env Variables
+      - name: Check Env
         run: |
-          mkdir -p CI/mlruns
-          echo "MLFLOW_TRACKING_URI=file://$(pwd)/CI/mlruns" >> $GITHUB_ENV
-
+          echo $CSV_URL
+      # Install mlflow
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install mlflow pandas scikit-learn openpyxl
-
-      - name: Verify files exist
-        working-directory: ./CI
+          python -m pip install --upgrade pip
+          pip install mlflow  
+          
+      # Run as a mlflow project
+      - name: Run mlflow project
         run: |
-          ls -la
-          test -f MLProject || (echo "Missing MLProject" && exit 1)
-          test -f modeling.py || (echo "Missing modeling.py" && exit 1)
-          test -f data_train.xlsx || (echo "Missing data" && exit 1)
-          test -f testing.xlsx || (echo "Missing testing data" && exit 1)
-
-      - name: Run MLflow project
-        working-directory: ./CI
+          mlflow run MLproject --env-manager=local 
+      
+      # Get latest run_id
+      - name: Get latest MLflow run_id
         run: |
-          mlflow run . --env-manager=local
-
-      - name: Get latest run ID
-        id: get_run_id
-        working-directory: ./CI
-        run: |
-          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | awk -F'/' '{print $3}')
-          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
+          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
+          echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
           echo "Latest run_id: $RUN_ID"
-
-      - name: Build Docker model
-        working-directory: ./CI
+          
+      # Build Docker Model
+      - name: Build Docker Model
         run: |
-          mlflow models build-docker --model-uri "runs:/${{ steps.get_run_id.outputs.run_id }}/random_forest_final_model" --name sugarcane-model
+          mlflow models build-docker --model-uri "runs:/$RUN_ID/model" --name "cc" 
 
+      # Login to Docker Hub
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Tag and Push Docker Image
+      # Tag the Docker image
+      - name: Tag Docker Image
         run: |
-          docker tag sugarcane-model ${{ secrets.DOCKER_HUB_USERNAME }}/sugarcane:latest
+          docker tag cc ${{ secrets.DOCKER_HUB_USERNAME }}/sugarcane:latest
+
+      # Push Docker image to Docker Hub
+      - name: Push Docker Image
+        run: |
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/sugarcane:latest
