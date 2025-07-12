@@ -45,7 +45,7 @@ if __name__ == "__main__":
     }
 
     model = RandomForestRegressor(random_state=42)
-    grid_search = GridSearchCV(model, param_grid, scoring="neg_mean_squared_error", cv=5, n_jobs=-1, verbose=2)
+    grid_search = GridSearchCV(model, param_grid, scoring="neg_mean_squared_error", cv=5, n_jobs=1, verbose=2)
     grid_search.fit(X_train, y_train)
     best_model = grid_search.best_estimator_
 
