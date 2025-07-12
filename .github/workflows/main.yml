@@ -46,7 +46,7 @@ jobs:
       
       - name: Build Docker Model
         run: |
-          mlflow models build-docker --model-uri "runs:/$RUN_ID/model" --name cc
+          mlflow models build-docker --model-uri "runs:/$RUN_ID/model" --name sugarcane
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
@@ -56,8 +56,8 @@ jobs:
 
       - name: Tag Docker Image
         run: |
-          docker tag cc ${{ secrets.DOCKER_HUB_USERNAME }}/cc:latest
+          docker tag cc ${{ secrets.DOCKER_HUB_USERNAME }}/sugarcane:latest
 
       - name: Push Docker Image
         run: |
-          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/cc:latest
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/sugarcane:latest
