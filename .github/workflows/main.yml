@@ -32,7 +32,7 @@ jobs:
         working-directory: ./CI
         run: |
           ls -la
-          test -f MLproject || (echo "Missing MLproject" && exit 1)
+          test -f MLProject || (echo "Missing MLProject" && exit 1)
           test -f modeling.py || (echo "Missing modeling.py" && exit 1)
           test -f data_train.xlsx || (echo "Missing data" && exit 1)
           test -f testing.xlsx || (echo "Missing testing data" && exit 1)
