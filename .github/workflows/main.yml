@@ -46,17 +46,16 @@ jobs:
           cd CI
           mlflow run . --env-manager=local
 
-      - name: Get Latest Run ID
-        id: get-run-id
+      - name: Get latest MLflow run_id
         run: |
-          RUN_ID=$(ls -td ../mlruns/0/*/ | head -n 1 | cut -d'/' -f4)
+          RUN_ID=$(ls -td mlruns/0/*/ | head -n 1 | cut -d'/' -f3)
           echo "RUN_ID=$RUN_ID" >> $GITHUB_ENV
-          echo "run_id=$RUN_ID" >> $GITHUB_OUTPUT
-
-      - name: Build Docker Image from MLflow Model
+          echo "Latest run_id: $RUN_ID"
+          
+      # Build Docker Model
+      - name: Build Docker Model
         run: |
-          mlflow models build-docker --model-uri "runs:/dfdfc8b943d84099b95f4f86895ce2d0/model" --name sugarcane
-
+          mlflow models build-docker --model-uri "runs:/$RUN_ID/model" --name "sugarcane" 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
