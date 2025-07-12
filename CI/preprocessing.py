@@ -51,4 +51,4 @@ def preprocess_data(train_df, test_df, target_column, save_path, file_path):
     feature_names = preprocessor.get_feature_names_out()
     pd.DataFrame(columns=feature_names).to_csv(file_path, index=False)
 
-    return X_train_processed, X_test_processed, y_train, y_test
+    return X_train_processed, X_test_processed, y_train, y_test, preprocessor.get_feature_names_out()
