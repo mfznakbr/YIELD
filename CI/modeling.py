@@ -33,7 +33,7 @@ if __name__ == "__main__":
     preprocessing_path = os.path.join(os.path.dirname(__file__), "preprocessing.joblib")
     columns_path = os.path.join(os.path.dirname(__file__), "columns.csv")
 
-    X_train, X_test, y_train, y_test = preprocess_data(
+    X_train, X_test, y_train, y_test, feature_names = preprocess_data(
         train_df, test_df, target_column=target,
         save_path=preprocessing_path,
         file_path=columns_path
@@ -88,8 +88,9 @@ if __name__ == "__main__":
         mlflow.log_artifact(columns_path)
 
         # Log model dengan input_example dan signature
-        input_example = pd.DataFrame(X_test[:1], columns=X_train.columns)
-        signature = infer_signature(X_train, best_model.predict(X_train[:1]))
+        input_example = pd.DataFrame([X_test[0]], columns=feature_names)
+        signature = infer_signature(pd.DataFrame([X_train[0]], columns=feature_names),
+                                        best_model.predict([X_train[0]]))
 
         mlflow.sklearn.log_model(
             sk_model=best_model,
