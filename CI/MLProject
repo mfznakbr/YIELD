@@ -1,12 +1,11 @@
 name: predict_yield
 
-conda_env: conda.yaml  # <-- pastikan file ini ada juga
+conda_env: conda.yaml
 
 entry_points:
   main:
     parameters:
       n_estimators: {type: int, default: 100}
       max_depth: {type: int, default: 10}
-      data_path: {type: str, default: "data_train.xlsx"}
-    command: >
-      python modeling.py {n_estimators} {max_depth} {data_path}
+      dataset : {type: string, default: "data_train.xlsx"}
+    command: "python modelling.py {n_estimators} {max_depth} {dataset}"
