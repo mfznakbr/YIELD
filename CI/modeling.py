@@ -25,7 +25,11 @@ X_train, X_test, y_train, y_test = preprocess_data(
 # ==== 2. Preprocess ====
 
 # ==== 3. Setup MLflow ====
-mlflow.set_tracking_uri("http://127.0.0.1:5005")
+import os
+
+if "GITHUB_ACTIONS" not in os.environ:
+    mlflow.set_tracking_uri("http://127.0.0.1:5005")
+
 mlflow.set_experiment("Prediksi Panen Tebu (GridSearch RF)")
 
 with mlflow.start_run():
