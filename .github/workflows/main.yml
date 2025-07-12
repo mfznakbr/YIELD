@@ -9,7 +9,7 @@ on:
         -main
 
 env:
-  xlx_url = "CICD\data_train.xlsx"
+  xlx_url = "CI\data_train.xlsx"
   target = "Ton"
 
 
