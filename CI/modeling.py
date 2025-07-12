@@ -1,7 +1,15 @@
 import os
-os.environ["MLFLOW_TRACKING_URI"] = "file://" + os.path.abspath("mlruns")
-os.environ["MLFLOW_ARTIFACTS_URI"] = "file://" + os.path.abspath("mlruns")
+from pathlib import Path
 
+# Fix path untuk GitHub Actions
+mlruns_path = Path(__file__).parent / "mlruns"
+mlruns_path.mkdir(exist_ok=True)
+
+os.environ["MLFLOW_TRACKING_URI"] = f"file://{mlruns_path.absolute()}"
+os.environ["MLFLOW_ARTIFACTS_URI"] = f"file://{mlruns_path.absolute()}"
+print(f"Tracking URI: {os.environ['MLFLOW_TRACKING_URI']}")  # Debugging
+
+# ... (kode lainnya tetap sama)
 import mlflow
 import pandas as pd
 import numpy as np
