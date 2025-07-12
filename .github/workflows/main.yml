@@ -55,7 +55,7 @@ jobs:
 
       - name: Build Docker Image from MLflow Model
         run: |
-          mlflow models build-docker --model-uri "runs:/${{ env.RUN_ID }}/model" --name sugarcane
+          mlflow models build-docker --model-uri "runs:/dfdfc8b943d84099b95f4f86895ce2d0/model" --name sugarcane
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
