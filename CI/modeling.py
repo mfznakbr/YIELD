@@ -82,7 +82,6 @@ if __name__ == "__main__":
             sk_model=best_model,
             artifact_path="random_forest_final_model",
             input_example=input_example,
-            registered_model_name="predict_sugarcane"
         )
 
         print("✅ Best Params:", grid_search.best_params_)
