@@ -10,7 +10,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from preprocessing import preprocess_data
 
-# Tracking URI aman untuk CI/CD GitHub Actions
+# Tracking URI lokal saat di GitHub Actions
 if "GITHUB_ACTIONS" in os.environ:
     mlflow.set_tracking_uri("sqlite:///mlflow.db")
 
@@ -24,7 +24,6 @@ if __name__ == "__main__":
 
     print(f"Reading train data from: {file_path}")
 
-    # Load data
     train_df = pd.read_excel(file_path)
     test_df = pd.read_excel(os.path.join(os.path.dirname(__file__), "testing.xlsx"))
     target = "Ton"
@@ -35,7 +34,6 @@ if __name__ == "__main__":
         file_path=os.path.join(os.path.dirname(__file__), "columns.csv")
     )
 
-    # -- BLOK INI SUDAH DIPERBAIKI INDENTASINYA --
     param_grid = {
         "n_estimators": [n_estimators],
         "max_depth": [max_depth],
@@ -51,6 +49,10 @@ if __name__ == "__main__":
 
     y_pred = best_model.predict(X_test)
 
+    # ✅ START MLflow RUN *hanya jika tidak aktif*
+    if mlflow.active_run() is None:
+        mlflow.start_run()
+
     mlflow.log_params({"n_estimators": n_estimators, "max_depth": max_depth})
     mlflow.log_metrics({
         "test_mse": mean_squared_error(y_test, y_pred),
@@ -65,3 +67,7 @@ if __name__ == "__main__":
         input_example=X_train[:1],
         name="model"
     )
+
+    # ✅ END RUN *jika kita yang memulainya*
+    if mlflow.active_run():
+        mlflow.end_run()
