@@ -1,19 +1,3 @@
-import os
-from pathlib import Path
-import pandas as pd
-import numpy as np
-import warnings
-import sys
-import mlflow
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
-from preprocessing import preprocess_data
-
-# Tracking URI lokal saat di GitHub Actions
-if "GITHUB_ACTIONS" in os.environ:
-    mlflow.set_tracking_uri("sqlite:///mlflow.db")
-
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     np.random.seed(42)
@@ -49,25 +33,8 @@ if __name__ == "__main__":
 
     y_pred = best_model.predict(X_test)
 
-    # ✅ START MLflow RUN *hanya jika tidak aktif*
-    if mlflow.active_run() is None:
-        mlflow.start_run()
-
-    mlflow.log_params({"n_estimators": n_estimators, "max_depth": max_depth})
-    mlflow.log_metrics({
-        "test_mse": mean_squared_error(y_test, y_pred),
-        "test_rmse": np.sqrt(mean_squared_error(y_test, y_pred)),
-        "test_mae": mean_absolute_error(y_test, y_pred),
-        "test_r2": r2_score(y_test, y_pred),
-        "accuracy": best_model.score(X_test, y_test)
-    })
-
-    mlflow.sklearn.log_model(
-        sk_model=best_model,
-        input_example=X_train[:1],
-        name="model"
-    )
-
-    # ✅ END RUN *jika kita yang memulainya*
-    if mlflow.active_run():
-        mlflow.end_run()
+    with mlflow.start_run():
+        mlflow.log_params({"n_estimators": n_estimators, "max_depth": max_depth})
+        mlflow.log_metrics({
+            "test_mse": mean_squared_error(y_test, y_pred),
+            "test_rmse": np.sqrt(m_
