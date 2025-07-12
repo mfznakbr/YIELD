@@ -1,3 +1,20 @@
+import os
+from pathlib import Path
+import pandas as pd
+import numpy as np
+import warnings
+import sys
+import mlflow
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
+from preprocessing import preprocess_data
+
+# Tracking URI lokal saat di GitHub Actions
+if "GITHUB_ACTIONS" in os.environ:
+    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+
+
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     np.random.seed(42)
