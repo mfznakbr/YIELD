@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     # === Setup MLflow ===
     # Jangan set URI agar default ke ./mlruns (portable untuk GitHub Actions)
-    mlflow.set_experiment("Prediksi Panen Tebu (GridSearch RF)")
+    #mlflow.set_experiment("Prediksi Panen Tebu (GridSearch RF)")
 
     with mlflow.start_run(nested=True):
         # Auto-log semua artifact dan metric
