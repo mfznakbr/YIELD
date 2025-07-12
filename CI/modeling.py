@@ -54,4 +54,15 @@ if __name__ == "__main__":
         mlflow.log_params({"n_estimators": n_estimators, "max_depth": max_depth})
         mlflow.log_metrics({
             "test_mse": mean_squared_error(y_test, y_pred),
-            "test_rmse": np.sqrt(m_
+            "test_rmse": np.sqrt(mean_squared_error(y_test, y_pred)),
+            "test_mae": mean_absolute_error(y_test, y_pred),
+            "test_r2": r2_score(y_test, y_pred),
+            "accuracy": best_model.score(X_test, y_test)
+        })
+    
+        mlflow.sklearn.log_model(
+            sk_model=best_model,
+            input_example=X_train[:1],
+            name="model"
+        )
+
