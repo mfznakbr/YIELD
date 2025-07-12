@@ -35,10 +35,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install mlflow pandas scikit-learn catboost openpyxl
       
+      - name: Verify Files Exist
+        working-directory: ./CI
+        run: |
+          ls -la
+          test -f data_train.xlsx || (echo "Data train not found!" && exit 1)
+          test -f testing.xlsx || (echo "Testing data not found!" && exit 1)
+          test -f preprocessing.py || (echo "Preprocessing script not found!" && exit 1)
+      
       - name: Run mlflow project
         working-directory: ./CI
         run: |
-          mlflow run . --env-manager=local
+          mlflow run . --env-manager=local || (echo "MLflow run failed!" && exit 1)
       
       - name: Get latest MLflow run_id
         id: get_run_id
