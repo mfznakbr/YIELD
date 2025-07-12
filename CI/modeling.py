@@ -12,7 +12,7 @@ from preprocessing import preprocess_data
 
 # Tracking URI aman untuk CI/CD GitHub Actions
 if "GITHUB_ACTIONS" in os.environ:
-    mlflow.set_tracking_uri("sqlite:///:memory:")
+    mlflow.set_tracking_uri("sqlite:///mlflow.db")
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
