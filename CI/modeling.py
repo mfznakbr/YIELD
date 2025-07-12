@@ -10,21 +10,22 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 from preprocessing import preprocess_data
 
-# Tracking URI lokal saat di GitHub Actions
-if "GITHUB_ACTIONS" in os.environ:
-    mlflow.set_tracking_uri("sqlite:///mlflow.db")
+# Initialize MLflow tracking
+mlflow.set_tracking_uri("sqlite:///mlflow.db")
+Path("mlflow.db").touch()  # Ensure database file exists
 
 if __name__ == "__main__":
     warnings.filterwarnings("ignore")
     np.random.seed(42)
 
-    # Argumen CLI
+    # CLI arguments
     n_estimators = int(sys.argv[1]) if len(sys.argv) > 1 else 100
     max_depth = int(sys.argv[2]) if len(sys.argv) > 2 else 10
     file_path = sys.argv[3] if len(sys.argv) > 3 else os.path.join(os.path.dirname(__file__), "data_train.xlsx")
 
     print(f"Reading train data from: {file_path}")
 
+    # Load and preprocess data
     train_df = pd.read_excel(file_path)
     test_df = pd.read_excel(os.path.join(os.path.dirname(__file__), "testing.xlsx"))
     target = "Ton"
@@ -35,6 +36,7 @@ if __name__ == "__main__":
         file_path=os.path.join(os.path.dirname(__file__), "columns.csv")
     )
 
+    # Model training with GridSearch
     param_grid = {
         "n_estimators": [n_estimators],
         "max_depth": [max_depth],
@@ -47,12 +49,18 @@ if __name__ == "__main__":
     grid_search = GridSearchCV(model, param_grid, scoring="neg_mean_squared_error", cv=5, n_jobs=1, verbose=2)
     grid_search.fit(X_train, y_train)
     best_model = grid_search.best_estimator_
-
     y_pred = best_model.predict(X_test)
 
-    # 🟢 Pindahkan ke dalam sini
+    # MLflow logging
     with mlflow.start_run():
-        mlflow.log_params({"n_estimators": n_estimators, "max_depth": max_depth})
+        # Log parameters (including best params from grid search)
+        mlflow.log_params({
+            **grid_search.best_params_,
+            "n_estimators_cli": n_estimators,
+            "max_depth_cli": max_depth
+        })
+        
+        # Log metrics
         mlflow.log_metrics({
             "test_mse": mean_squared_error(y_test, y_pred),
             "test_rmse": np.sqrt(mean_squared_error(y_test, y_pred)),
@@ -61,8 +69,9 @@ if __name__ == "__main__":
             "accuracy": best_model.score(X_test, y_test)
         })
 
+        # Log model
         mlflow.sklearn.log_model(
             sk_model=best_model,
-            input_example=X_train[:1],
-            name="model"
+            artifact_path="model",
+            input_example=X_train[:1]
         )
